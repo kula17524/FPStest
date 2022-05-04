@@ -20,6 +20,9 @@ public class FPSController : MonoBehaviour
     // カーソルの非表示(true=非表示)
     bool cursorLock = true;
 
+    // アニメーション
+    public Animator animator;
+
 
     // Start is called before the first frame update
     void Start()
@@ -47,6 +50,46 @@ public class FPSController : MonoBehaviour
 
         // カーソルの表示・非表示の関数呼び出し
         UpdateCursorLock();
+
+        // アニメーション
+        // 射撃
+        if (Input.GetMouseButton(0))
+        {
+            animator.SetTrigger("Fire");
+        }
+        // リロード
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            animator.SetTrigger("Reload");
+        }
+        // 歩く
+        // 前後移動に対応するため絶対値で判定(Mathf.Abs)
+        if (Mathf.Abs(x) > 0 || Mathf.Abs(z) > 0)
+        {
+            if (!animator.GetBool("Walk"))
+            {
+                animator.SetBool("Walk", true);
+            }
+        }
+        else if (animator.GetBool("Walk"))
+        {
+            animator.SetBool("Walk", false);
+        }
+        // 走る
+        // 後ろ向き移動の時は走らせない
+        if (z > 0 && Input.GetKey(KeyCode.LeftShift))
+        {
+            if (!animator.GetBool("Run"))
+            {
+                animator.SetBool("Run", true);
+                speed = 0.25f;
+            }
+        }
+        else if (animator.GetBool("Run"))
+        {
+            animator.SetBool("Run", false);
+            speed = 0.1f;
+        }
     }
 
     private void FixedUpdate()
