@@ -30,6 +30,9 @@ public class FPSController : MonoBehaviour
         // 最初にカメラとキャラクターの向きを取得
         cameraRot = cam.transform.localRotation;
         characterRot = transform.localRotation;
+
+        // 銃撃できるようにする
+            GameState.canShoot = true;
     }
 
     // Update is called once per frame
@@ -53,9 +56,11 @@ public class FPSController : MonoBehaviour
 
         // アニメーション
         // 射撃
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && GameState.canShoot)
         {
             animator.SetTrigger("Fire");
+            // 連続でアニメーション再生されるのを防ぐ
+            GameState.canShoot = false;
         }
         // リロード
         if (Input.GetKeyDown(KeyCode.R))
