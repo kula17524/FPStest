@@ -18,6 +18,8 @@ public class ZombieController : MonoBehaviour
 
     GameObject target;
 
+    public int attackDamage;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +45,10 @@ public class ZombieController : MonoBehaviour
     // float型のプレイヤーとゾンビの距離を返す関数
     float DistanceToPlayer()
     {
+        if (GameState.GameOver)
+        {
+            return Mathf.Infinity;
+        }
         return Vector3.Distance(target.transform.position, transform.position);
     }
 
@@ -66,6 +72,21 @@ public class ZombieController : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void DamagePlayer()
+    {
+        if (target != null)
+        {
+            target.GetComponent<FPSController>().TakeHit(attackDamage);
+        }
+    }
+
+    public void ZombieDeath()
+    {
+        TurnOffTrigger();
+        animator.SetBool("Death", true);
+        state = STATE.DEAD;
     }
 
     // Update is called once per frame
@@ -117,6 +138,15 @@ public class ZombieController : MonoBehaviour
                 break;
 
             case STATE.CHASE:
+
+                if (GameState.GameOver)
+                {
+                    TurnOffTrigger();
+                    agent.ResetPath();
+                    state = STATE.WANDER;
+
+                    return;
+                }
                 agent.SetDestination(target.transform.position);
                 agent.stoppingDistance = 3;
 
@@ -125,12 +155,43 @@ public class ZombieController : MonoBehaviour
                 agent.speed = runSpeed;
                 animator.SetBool("Run", true);
 
+                if(agent.remainingDistance <= agent.stoppingDistance)
+                {
+                    state = STATE.ATTACK;
+                }
+
                 if (ForgetPlayer())
                 {
                     agent.ResetPath();
                     state = STATE.WANDER;
                 }
 
+                break;
+
+            case STATE.ATTACK:
+
+                if (GameState.GameOver)
+                {
+                    TurnOffTrigger();
+                    agent.ResetPath();
+                    state = STATE.WANDER;
+
+                    return;
+                }
+                TurnOffTrigger();
+                animator.SetBool("Attack", true);
+
+                transform.LookAt(new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z));
+
+                if(DistanceToPlayer() > agent.stoppingDistance + 2)
+                {
+                    state = STATE.CHASE;
+                }
+
+                break;
+            
+            case STATE.DEAD:
+                Destroy(agent);
                 break;
         }
     }

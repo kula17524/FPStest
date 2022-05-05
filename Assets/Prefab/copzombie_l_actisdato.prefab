@@ -1411,6 +1411,7 @@ GameObject:
   - component: {fileID: 5534081939975831175}
   - component: {fileID: 1592978870966176373}
   - component: {fileID: 5480926889943283954}
+  - component: {fileID: 3380805913871213077}
   m_Layer: 0
   m_Name: copzombie_l_actisdato
   m_TagString: Untagged
@@ -1471,6 +1472,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walkingSpeed: 1
+  runSpeed: 1.25
+  attackDamage: 0
 --- !u!195 &5480926889943283954
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1493,6 +1496,20 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!136 &3380805913871213077
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5534081939975831174}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &5605325053656802775
 GameObject:
   m_ObjectHideFlags: 0

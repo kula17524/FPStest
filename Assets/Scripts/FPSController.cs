@@ -37,6 +37,11 @@ public class FPSController : MonoBehaviour
     // 弾薬テキスト
     public Text ammoText;
 
+    // サウンド
+    public AudioSource playerFootStep;
+    public AudioClip WalkFootStepSE, RunFootStepSE;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -88,7 +93,7 @@ public class FPSController : MonoBehaviour
             }
             else
             {
-                Debug.Log("弾がないよ");
+                Weapon.instance.TriggerSE();
             }
             
         }
@@ -118,11 +123,13 @@ public class FPSController : MonoBehaviour
             if (!animator.GetBool("Walk"))
             {
                 animator.SetBool("Walk", true);
+                PlayerWalkFootStep(WalkFootStepSE);
             }
         }
         else if (animator.GetBool("Walk"))
         {
             animator.SetBool("Walk", false);
+            StopFootStep();
         }
         // 走る
         // 後ろ向き移動の時は走らせない
@@ -132,12 +139,16 @@ public class FPSController : MonoBehaviour
             {
                 animator.SetBool("Run", true);
                 speed = 0.25f;
+
+                PlayerRunFootStep(RunFootStepSE);
             }
         }
         else if (animator.GetBool("Run"))
         {
             animator.SetBool("Run", false);
             speed = 0.1f;
+
+            StopFootStep();
         }
 
         // カメラの交代
@@ -145,6 +156,7 @@ public class FPSController : MonoBehaviour
         {
             subcam.SetActive(true);
             cam.GetComponent<Camera>().enabled = false;
+            Weapon.instance.TriggerSE();
         }
         else if (subcam.activeSelf)
         {
@@ -208,5 +220,40 @@ public class FPSController : MonoBehaviour
         q.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
 
         return q;
+    }
+
+    // 足音
+    public void PlayerWalkFootStep(AudioClip clip)
+    {
+        playerFootStep.loop = true;
+        playerFootStep.pitch = 1f;
+        playerFootStep.clip = clip;
+        playerFootStep.Play();
+    }
+    public void PlayerRunFootStep(AudioClip clip)
+    {
+        playerFootStep.loop = true;
+        playerFootStep.pitch = 1.3f;
+        playerFootStep.clip = clip;
+        playerFootStep.Play();
+    }
+    public void StopFootStep()
+    {
+        playerFootStep.Stop();
+        playerFootStep.loop = false;
+        playerFootStep.pitch = 1f;
+    }
+
+    //体力管理
+    public void TakeHit(float damage)
+    {
+        playerHP = (int)Mathf.Clamp(playerHP - damage, 0, playerHP);
+
+        hpBer.value = playerHP;
+
+        if (playerHP <= 0 && !GameState.GameOver)
+        {
+            GameState.GameOver = true;
+        }
     }
 }
