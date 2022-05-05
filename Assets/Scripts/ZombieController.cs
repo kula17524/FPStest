@@ -8,16 +8,27 @@ public class ZombieController : MonoBehaviour
     Animator animator;
     NavMeshAgent agent;
 
-    public float walkingSpeed;
+    // 移動スピード
+    public float walkingSpeed = 1f;
+    public float runSpeed = 1.25f;
 
+    // 状態
     enum STATE {IDLE, WANDER, ATTACK, CHASE, DEAD};
     STATE state = STATE.IDLE;
+
+    GameObject target;
 
     // Start is called before the first frame update
     void Start()
     {
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
+
+        // プレイヤーをターゲットとする
+        if(target == null)
+        {
+            target = GameObject.FindGameObjectWithTag("Player");
+        }
     }
 
     // モーションを止める関数
@@ -29,6 +40,34 @@ public class ZombieController : MonoBehaviour
         animator.SetBool("Death", false);
     }
 
+    // float型のプレイヤーとゾンビの距離を返す関数
+    float DistanceToPlayer()
+    {
+        return Vector3.Distance(target.transform.position, transform.position);
+    }
+
+    // プレイヤーが近くにいると発見
+    bool canSeePlayer()
+    {
+        if (DistanceToPlayer() < 15)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    // プレイヤーが離れると見失う
+    bool ForgetPlayer()
+    {
+        if (DistanceToPlayer() > 20)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -37,7 +76,11 @@ public class ZombieController : MonoBehaviour
             case STATE.IDLE:
                 TurnOffTrigger();
 
-                if (Random.Range(0, 5000) < 5)
+                if (canSeePlayer())
+                {
+                    state = STATE.CHASE;
+                }
+                else if (Random.Range(0, 5000) < 5)
                 {
                     state = STATE.WANDER;
                 }
@@ -66,8 +109,29 @@ public class ZombieController : MonoBehaviour
                     state = STATE.IDLE;
                     agent.ResetPath();
                 }
+
+                if (canSeePlayer())
+                {
+                    state = STATE.CHASE;
+                }
                 break;
 
+            case STATE.CHASE:
+                agent.SetDestination(target.transform.position);
+                agent.stoppingDistance = 3;
+
+                TurnOffTrigger();
+
+                agent.speed = runSpeed;
+                animator.SetBool("Run", true);
+
+                if (ForgetPlayer())
+                {
+                    agent.ResetPath();
+                    state = STATE.WANDER;
+                }
+
+                break;
         }
     }
 }
