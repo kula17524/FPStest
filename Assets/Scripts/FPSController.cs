@@ -23,6 +23,10 @@ public class FPSController : MonoBehaviour
     // アニメーション
     public Animator animator;
 
+    // 所持弾薬
+    int ammunition = 50, maxAmmunition = 50;
+    // マガジン内の弾数
+    int ammoClip = 10, maxAmmoClip = 10;
 
     // Start is called before the first frame update
     void Start()
@@ -58,14 +62,38 @@ public class FPSController : MonoBehaviour
         // 射撃
         if (Input.GetMouseButton(0) && GameState.canShoot)
         {
-            animator.SetTrigger("Fire");
-            // 連続でアニメーション再生されるのを防ぐ
-            GameState.canShoot = false;
+            // マガジンに弾があるかどうか
+            if (ammoClip > 0)
+            {
+                animator.SetTrigger("Fire");
+                // 連続でアニメーション再生されるのを防ぐ
+                GameState.canShoot = false;
+                // 弾数を減らす
+                ammoClip--;
+            }
+            else
+            {
+                Debug.Log("弾がないよ");
+            }
+            
         }
         // リロード
         if (Input.GetKeyDown(KeyCode.R))
         {
-            animator.SetTrigger("Reload");
+            // マガジンに補充する弾数
+            int amountNeed = maxAmmoClip - ammoClip;
+            // 実際に補充する弾数(持ち弾数と比較する)
+            int ammoAvailable = amountNeed < ammunition ? amountNeed : ammunition;
+
+            // 弾薬が満タンかつ弾数も満タン
+            if (amountNeed != 0 && ammunition != 0)
+            {
+                animator.SetTrigger("Reload");
+                ammunition -= ammoAvailable;
+                ammoClip += ammoAvailable;
+            }
+
+            
         }
         // 歩く
         // 前後移動に対応するため絶対値で判定(Mathf.Abs)
