@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FPSController : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class FPSController : MonoBehaviour
 
     // カメラ
     public GameObject cam;
+    public GameObject subcam;
     Quaternion cameraRot, characterRot;
     // 視点の角度制限
     float minX = -90f, maxX = 90f;
@@ -28,6 +30,13 @@ public class FPSController : MonoBehaviour
     // マガジン内の弾数
     int ammoClip = 10, maxAmmoClip = 10;
 
+    // 体力
+    int playerHP = 100, maxPlayerHP = 100;
+    // 体力バー
+    public Slider hpBer;
+    // 弾薬テキスト
+    public Text ammoText;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +46,11 @@ public class FPSController : MonoBehaviour
 
         // 銃撃できるようにする
             GameState.canShoot = true;
+
+            // 体力の反映
+            hpBer.value = playerHP;
+            // 弾薬テキストの反映
+            ammoText.text = ammoClip + "/" + ammunition;
     }
 
     // Update is called once per frame
@@ -70,6 +84,7 @@ public class FPSController : MonoBehaviour
                 GameState.canShoot = false;
                 // 弾数を減らす
                 ammoClip--;
+                ammoText.text = ammoClip + "/" + ammunition;
             }
             else
             {
@@ -91,6 +106,7 @@ public class FPSController : MonoBehaviour
                 animator.SetTrigger("Reload");
                 ammunition -= ammoAvailable;
                 ammoClip += ammoAvailable;
+                ammoText.text = ammoClip + "/" + ammunition;
             }
 
             
@@ -122,6 +138,18 @@ public class FPSController : MonoBehaviour
         {
             animator.SetBool("Run", false);
             speed = 0.1f;
+        }
+
+        // カメラの交代
+        if (Input.GetMouseButton(1))
+        {
+            subcam.SetActive(true);
+            cam.GetComponent<Camera>().enabled = false;
+        }
+        else if (subcam.activeSelf)
+        {
+            subcam.SetActive(false);
+            cam.GetComponent<Camera>().enabled = true;
         }
     }
 
